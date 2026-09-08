@@ -8,6 +8,7 @@ library(mvtnorm)
 library(parallel)
 library(lme4)
 library(tidyr)
+
 # ---- Set up ----
 expit <- function(x) {
   1 / (1 + exp(-x))
@@ -1556,99 +1557,6 @@ sim.inc.f <- function(sim.num, N, K, visit_times,
 
 
 
-# sim.inc.f <- function(nsim, N, K, visit_times, gamma11, gamma21, target_pi1, target_pi2, target_event, delta1, delta2, sigma_eps, Sigma, z_means, z_sds, omega, beta_X){
-#   # solve for gamma0 such that marginal probability = target_pi
-#   gamma10  <- solve_gamma0_occurrence(gamma1 = gamma11, muZ = z_means[1], sdZ = z_sds[1], Sigma_b2x2 = Sigma_b1, target = target_pi1)
-#   gamma20  <- solve_gamma0_occurrence(gamma1 = gamma21, muZ = z_means[2], sdZ = z_sds[2], Sigma_b2x2 = Sigma_b2, target = target_pi2)
-#   
-#   gamma1 <- c(gamma10, gamma11)
-#   gamma2 <- c(gamma20, gamma21)
-#   
-#   # solve h0 to reach target event rate
-#   sim.dat.test <- simulate_joint_data(N=N, K=K, visit_times=visit_times, gamma_list = list(gamma1, gamma2), delta_list = list(delta1,  delta2),
-#                                       sigma_eps = sigma_eps, Sigma = Sigma, z_means = z_means, z_sds   = z_sds,  
-#                                       omega = omega, h0 = 0.2, beta_X = beta_X, seed=2)
-#   
-#   h0 <- calibrate_h0(sim.dat = sim.dat.test, beta_X  = beta_X, omega  = omega, target  = target_event,     # aim for ~80% events on average
-#                      gfun = logp)
-#   
-#   
-#   # file output
-#   file.out <- paste("results/", "GVA_INC", "_NN", N, "_K",  K, "_gamma11", round(gamma11, 2), "_gamma21", round(gamma21, 2), 
-#                     "_targetpi1", target_pi1, "_targetpi2", target_pi2, "_targetevent", target_event, "_omega", omega, 
-#                     "_beta1_", round(beta_X[1], 2), "_beta2_", round(beta_X[2], 2), ".dat", sep="")
-#   
-#   if ( file.exists(as.character(file.out)) ) { unlink(as.character(file.out)) }
-#   
-#   cat("nsim", "N", "K", "target_pi1", "target_pi2", 
-#       "true_gamma10", "true_gamma11", "true_gamma20", "true_gamma21", "true_delta10", "true_delta11", "true_delta20", "true_delta21", 
-#       "true_omega", "true_h0", "true_beta1", "true_beta2",
-#       "est_gamma10"," est_gamma11", "est_gamma20", "est_gamma21", "est_delta10", "est_delta11",  "est_delta20", "est_delta21", 
-#       "est_sigma_eps1", "est_sigma_eps2",
-#       "est_omega", "est_h0", "est_beta1", "est_beta2",
-#       sep=" ", "\n", append=TRUE, file=file.out)
-#   
-#   
-#   target_success <- nsim
-#   failed_runs   <- integer(0)
-#   
-#   success  <- 0
-#   attempt  <- 0
-#   
-#   while (success < target_success) {
-#     attempt <- attempt + 1L
-#     
-#     # --- simulate (use a distinct seed so each replicate differs) ---
-#     sim.dat <- simulate_joint_data(N=N, K=K, visit_times=visit_times,
-#                                    gamma_list = list(gamma1, gamma2),
-#                                    delta_list = list(delta1,  delta2),
-#                                    sigma_eps = sigma_eps, Sigma = Sigma,
-#                                    z_means = z_means, z_sds   = z_sds,   
-#                                    omega = omega, h0 = h0, beta_X = beta_X,
-#                                    seed = attempt)
-#     # mean_pi_sim <- with(sim.dat[sim.dat$visit > 1, ], tapply(A, exposure, mean))
-#     # mean(sim.dat[sim.dat$visit == 1, "event"])
-#     # mean(sim.dat[sim.dat$visit == 1 & sim.dat$event == 1, "T_event"])
-#     
-#     # --- fit ---
-#     fit <- try(fit_gva_joint(dat=sim.dat, init_gamma=matrix(c(gamma1, gamma2)+runif(1,0, 0.2), nrow = K, byrow = T), init_delta=matrix(c(delta1, delta2)+runif(1,0, 0.2), nrow = K, byrow = T), 
-#                              init_sigma_eps=sigma_eps+runif(1,0, 0.2), init_beta=beta_X+runif(1,0, 0.2), init_omega=omega+runif(1,0, 0.2), init_h0=h0+runif(1,0, 0.2),
-#                              max_iter = 200L, tol = 1e-4, verbose = TRUE, use_piecewise_baseline = FALSE, ridge = 1e-8),
-#                silent = TRUE)
-#     
-#     # --- skip on any failure or malformed result ---
-#     if (inherits(fit, "try-error") || is.null(fit$beta)) {
-#       message(sprintf("[attempt %03d] fit_gva_joint() failed; skipping.", attempt))
-#       failed_runs <- c(failed_runs, attempt)
-#       next
-#     }
-#     if (!all(is.finite(fit$beta))) {
-#       message(sprintf("[attempt %03d] fit returned non-finite beta; skipping.", attempt))
-#       failed_runs <- c(failed_runs, attempt)
-#       next
-#     }
-#     
-#     success <- success + 1L
-#     message(sprintf("[attempt %03d] success %02d/%02d", attempt, success, target_success))
-#     
-#     cat(success, N, K, target_pi1, target_pi2, 
-#         gamma10, gamma11, gamma20, gamma21, delta1[1], delta1[2], delta2[1], delta2[2], 
-#         omega, h0, beta_X[1], beta_X[2], 
-#         fit$gamma[1,], fit$gamma[2,], fit$delta[1,], fit$delta[2,], 
-#         fit$sigma_eps,
-#         fit$omega, fit$baseline, fit$beta,
-#         sep=" ", "\n", append=TRUE, file=file.out)
-#     
-#   }
-#   
-#   return()
-# }
-
-
-
-
-
-
 sim.simple.f <- function(sim.num, N, K, visit_times, gamma11, gamma21, target_pi1, target_pi2, target_event, delta1, delta2, sigma_eps, Sigma, 
                          z_means, z_sds, omega, beta_X, a_shift, cores.num){
   Sigma1 <- Sigma[1:4, 1:4]
@@ -1901,48 +1809,6 @@ sim.simple.true.f <- function(sim.num, N, K, visit_times, gamma11, gamma21, targ
   
   return()
 }
-
-
-
-
-
-dat.plot.f <- function(seed, N, K, visit_times, gamma11, gamma21, target_pi1, target_pi2, target_event, delta1, delta2, sigma_eps, Sigma, 
-                       z_means, z_sds, omega, beta_X){
-  Sigma1 <- Sigma[1:4, 1:4]
-  Sigma2 <- Sigma[5:8, 5:8]
-  Sigma_b1 <- Sigma1[1:2, 1:2]  # For exposure 1 (b1_int, b1_slope)
-  Sigma_b2 <- Sigma2[1:2, 1:2] 
-  # solve for gamma0 such that marginal probability = target_pi
-  gamma10  <- solve_gamma0_occurrence(gamma1 = gamma11, muZ = z_means[1], sdZ = z_sds[1], Sigma_b2x2 = Sigma_b1, target = target_pi1)
-  gamma20  <- solve_gamma0_occurrence(gamma1 = gamma21, muZ = z_means[2], sdZ = z_sds[2], Sigma_b2x2 = Sigma_b2, target = target_pi2)
-  
-  gamma1 <- c(gamma10, gamma11)
-  gamma2 <- c(gamma20, gamma21)
-  
-  # solve h0 to reach target event rate
-  sim.dat.test <- simulate_joint_data(N=N, K=K, visit_times=visit_times, gamma_list = list(gamma1, gamma2), delta_list = list(delta1,  delta2),
-                                      sigma_eps = sigma_eps, Sigma = Sigma, z_means = z_means, z_sds   = z_sds,  
-                                      omega = omega, h0 = 0.2, beta_X = beta_X, seed=2)
-  
-  h0 <- calibrate_h0(sim.dat = sim.dat.test, beta_X  = beta_X, omega  = omega, target  = target_event,     # aim for ~80% events on average
-                     gfun = logp)
-  
-  
-  # --- simulate (use a distinct seed so each replicate differs) ---
-  sim.dat <- simulate_joint_data(N=N, K=K, visit_times=visit_times,
-                                 gamma_list = list(gamma1, gamma2),
-                                 delta_list = list(delta1,  delta2),
-                                 sigma_eps = sigma_eps, Sigma = Sigma,
-                                 z_means = z_means, z_sds   = z_sds,   
-                                 omega = omega, h0 = h0, beta_X = beta_X,
-                                 seed = seed)
-  
-  sim.dat <- data.frame(sim.dat)
-  dat.pre <- sim.dat %>% filter(exposure == 1) %>% filter(visit >1)
-  
-  return(dat.pre)
-}
-
 
 
 
@@ -2416,44 +2282,3 @@ summary.semi.gva.betaonly.f <- function(N, K, target_pi, target_event, sigma_eps
   
   invisible(list(beta_bias = beta_bias, beta_se = beta_se))
 }
-
-
-
-
-
-
-
-
-
-
-# summary.gva.f <- function(N, K, gamma11, gamma21, target_pi, target_event, sigma_eps, omega, beta_X){
-#   
-#   # print(paste("results/", "GVA_INC", "_NN", N, "_K",  K, "_gamma11", round(gamma11, 2), "_gamma21", round(gamma21, 2), 
-#   #             "_targetpi1", target_pi, "_targetpi2", target_pi, "_targetevent", target_event, "_omega", omega, 
-#   #             "_beta1_", round(beta_X[1], 2), "_beta2_", round(beta_X[2], 2), ".dat", sep=""))
-#   sim.out <- read.table(paste("results/", "GVA_INC", "_NN", N, "_K",  K, "_gamma11", round(gamma11, 2), "_gamma21", round(gamma21, 2), 
-#                               "_targetpi1", target_pi, "_targetpi2", target_pi, "_targetevent", target_event, "_omega", omega, 
-#                               "_beta1_", round(beta_X[1], 2), "_beta2_", round(beta_X[2], 2), ".dat", sep=""), header=TRUE)
-#   
-#   
-#   cat(N, " \t ", target_event," \t ", target_pi, " \t ",round(beta_X[1], 2), " \t ", 
-#       format(abs(round(mean(sim.out$est_beta1)-mean(sim.out$true_beta1), 3)), nsmall=3), " (", format(round(sd(sim.out$est_beta1), 3), nsmall=3), ")\t",
-#       format(abs(round(mean(sim.out$est_beta2)-mean(sim.out$true_beta2), 3)), nsmall=3), " (", format(round(sd(sim.out$est_beta2), 3), nsmall=3), ")\t",
-#       format(abs(round(mean(sim.out$est_omega)-mean(sim.out$true_omega), 3)), nsmall=3), " (", format(round(sd(sim.out$est_omega), 3), nsmall=3), ")\t",
-#       format(abs(round(mean(sim.out$est_h0)-mean(sim.out$true_h0), 3)), nsmall=3), " (", format(round(sd(sim.out$est_h0), 3), nsmall=3), ")\t",
-#       format(abs(round(mean(sim.out$est_gamma10)-mean(sim.out$true_gamma10), 3)), nsmall=3), " (", format(round(sd(sim.out$est_gamma10), 3), nsmall=3), ")\t",
-#       format(abs(round(mean(sim.out$est_gamma11)-mean(sim.out$true_gamma11), 3)), nsmall=3), " (", format(round(sd(sim.out$est_gamma11), 3), nsmall=3), ")\t",
-#       format(abs(round(mean(sim.out$est_gamma20)-mean(sim.out$true_gamma20), 3)), nsmall=3), " (", format(round(sd(sim.out$est_gamma20), 3), nsmall=3), ")\t",
-#       format(abs(round(mean(sim.out$est_gamma21)-mean(sim.out$true_gamma21), 3)), nsmall=3), " (", format(round(sd(sim.out$est_gamma21), 3), nsmall=3), ")\t",
-#       format(abs(round(mean(sim.out$est_delta10)-mean(sim.out$true_delta10), 3)), nsmall=3), " (", format(round(sd(sim.out$est_delta10), 3), nsmall=3), ")\t",
-#       format(abs(round(mean(sim.out$est_delta11)-mean(sim.out$true_delta11), 3)), nsmall=3), " (", format(round(sd(sim.out$est_delta11), 3), nsmall=3), ")\t",
-#       format(abs(round(mean(sim.out$est_delta20)-mean(sim.out$true_delta20), 3)), nsmall=3), " (", format(round(sd(sim.out$est_delta20), 3), nsmall=3), ")\t",
-#       format(abs(round(mean(sim.out$est_delta21)-mean(sim.out$true_delta21), 3)), nsmall=3), " (", format(round(sd(sim.out$est_delta21), 3), nsmall=3), ")\t",
-#       format(abs(round(mean(sim.out$est_sigma_eps1)-mean(sigma_eps[1]), 3)), nsmall=3), " (", format(round(sd(sim.out$est_sigma_eps1), 3), nsmall=3), ")\t",
-#       format(abs(round(mean(sim.out$est_sigma_eps2)-mean(sigma_eps[2]), 3)), nsmall=3), " (", format(round(sd(sim.out$est_sigma_eps2), 3), nsmall=3), ")",
-#       "\n", sep="", append=TRUE, file=file.out)
-#   
-#   
-#   return()
-# }
-
