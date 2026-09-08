@@ -1,5 +1,5 @@
-source("share-func-inc.R")
-cores.num <- 15
+source("share-func.R")
+cores.num <- 10
 
 
 # parameter setting -------------------------------------------------------
@@ -38,8 +38,6 @@ for (i in 1:K) {
 
 # Final 4Kx4K matrix
 Sigma <- do.call(rbind, block_list)
-# eigen(Sigma)$values # if is not positive definite, reduce the absolute value of the off-diagonal elements that you suspect are too large, or increase the value of the diagonal elements.
-
 
 
 
@@ -48,38 +46,140 @@ N = 1000
 
 for (target_event in c(0.1, 0.3)) {
   sim.inc.f(sim.num = 1000, N = N, K = K, visit_times = c(0, 1, 2, 3), gamma1 = rep(0.5, K),
-            target_pi = c(0.3, 0.3, 0.3, 0.1, 0.1), ######
+            target_pi = c(0.3, 0.3, 0.3, 0.1, 0.1), 
             delta = matrix(rep(c(0.3, 0.2), K), nrow = K, byrow = TRUE),
             sigma_eps = rep(0.5, K), Sigma = Sigma, z_means = rep(0, K), z_sds = rep(1, K),
-            target_event = target_event, ######
+            target_event = target_event, 
             weib_shape = 1.1, omega = 0.2,
-            beta_X = c(0, 0, 0, log(1.5), log(1.5)), ######
+            beta_X = c(0, 0, 0, log(1.5), log(1.5)), 
             cores.num = cores.num)
 }
 
 
 for (target_event in c(0.1, 0.3)) {
   sim.inc.f(sim.num = 1000, N = N, K = K, visit_times = c(0, 1, 2, 3), gamma1 = rep(0.5, K),
-            target_pi = c(0.1, 0.1, 0.1, 0.3, 0.3), ######
+            target_pi = c(0.1, 0.1, 0.1, 0.3, 0.3), 
             delta = matrix(rep(c(0.3, 0.2), K), nrow = K, byrow = TRUE),
             sigma_eps = rep(0.5, K), Sigma = Sigma, z_means = rep(0, K), z_sds = rep(1, K),
-            target_event = target_event, ######
+            target_event = target_event, 
             weib_shape = 1.1, omega = 0.2,
-            beta_X = c(0, 0, 0, log(1.5), log(1.5)), ######
+            beta_X = c(0, 0, 0, log(1.5), log(1.5)), 
             cores.num = cores.num)
 }
 
 
 for (target_event in c(0.1, 0.3)) {
   sim.inc.f(sim.num = 1000, N = N, K = K, visit_times = c(0, 1, 2, 3), gamma1 = rep(0.5, K),
-            target_pi = c(0.2, 0.2, 0.2, 0.2, 0.2), ######
+            target_pi = c(0.2, 0.2, 0.2, 0.2, 0.2), 
             delta = matrix(rep(c(0.3, 0.2), K), nrow = K, byrow = TRUE),
             sigma_eps = rep(0.5, K), Sigma = Sigma, z_means = rep(0, K), z_sds = rep(1, K),
-            target_event = target_event, ######
+            target_event = target_event, 
             weib_shape = 1.1, omega = 0.2,
-            beta_X = c(0, 0, 0, log(1.5), log(1.5)), ######
+            beta_X = c(0, 0, 0, log(1.5), log(1.5)), 
+            cores.num = cores.num)
+}
+
+for (target_event in c(0.1, 0.3)) {
+  sim.inc.f(sim.num = 1000, N = N, K = K, visit_times = c(0, 1, 2, 3), gamma1 = rep(0.5, K),
+            target_pi = c(0.2, 0.2, 0.2, 0.2, 0.2), 
+            delta = matrix(rep(c(0.3, 0.2), K), nrow = K, byrow = TRUE),
+            sigma_eps = rep(0.5, K), Sigma = Sigma, z_means = rep(0, K), z_sds = rep(1, K),
+            target_event = target_event, 
+            weib_shape = 1.1, omega = 0.2,
+            beta_X = c(log(1.05), log(1.05), log(1.05), log(1.05), log(1.05)), 
+            cores.num = cores.num)
+}
+
+
+for (target_event in c(0.1, 0.3)) {
+  sim.inc.f(sim.num = 1000, N = N, K = K, visit_times = c(0, 1, 2, 3), gamma1 = rep(0.5, K),
+            target_pi = c(0.1, 0.1, 0.1, 0.3, 0.3), 
+            delta = matrix(rep(c(0.3, 0.2), K), nrow = K, byrow = TRUE),
+            sigma_eps = rep(0.5, K), Sigma = Sigma, z_means = rep(0, K), z_sds = rep(1, K),
+            target_event = target_event, 
+            weib_shape = 1.1, omega = 0.2,
+            beta_X = c(log(1.05), log(1.05), log(1.05), log(1.05), log(1.05)), 
             cores.num = cores.num)
 }
 
 
 
+# Summary --------------------------------------------------------------
+
+file.out <- "summary.semi.weib.beta.5.out"
+if ( file.exists(as.character(file.out)) ) { unlink(as.character(file.out)) }
+
+for (target_event in c(0.3, 0.1)) {
+  summary.semi.gva.betaonly.f(N=1000, K=K, target_pi=c(0.3, 0.3, 0.3, 0.1, 0.1),  
+                              target_event=target_event, 
+                              sigma_eps = rep(0.5, K), 
+                              omega=0.2, weib_shape=1.1, 
+                              beta_X = c(0, 0, 0, log(1.5), log(1.5)), 
+                              out_dir="results", file.out=file.out)
+  summary.semi.gva.betaonly.f(N=1000, K=K, target_pi=c(0.1, 0.1, 0.1, 0.3, 0.3),  
+                              target_event=target_event, 
+                              sigma_eps = rep(0.5, K), 
+                              omega=0.2, weib_shape=1.1, 
+                              beta_X = c(0, 0, 0, log(1.5), log(1.5)), 
+                              out_dir="results", file.out=file.out)
+  summary.semi.gva.betaonly.f(N=1000, K=K, target_pi=c(0.2, 0.2, 0.2, 0.2, 0.2),  
+                              target_event=target_event, 
+                              sigma_eps = rep(0.5, K), 
+                              omega=0.2, weib_shape=1.1, 
+                              beta_X = c(0, 0, 0, log(1.5), log(1.5)), 
+                              out_dir="results", file.out=file.out)
+  summary.semi.gva.betaonly.f(N=1000, K=K, target_pi=c(0.2, 0.2, 0.2, 0.2, 0.2),  
+                              target_event=target_event, 
+                              sigma_eps = rep(0.5, K), 
+                              omega=0.2, weib_shape=1.1, 
+                              beta_X = c(log(1.05), log(1.05), log(1.05), log(1.05), log(1.05)), 
+                              out_dir="results", file.out=file.out)
+  summary.semi.gva.betaonly.f(N=1000, K=K, target_pi=c(0.1, 0.1, 0.1, 0.3, 0.3),  
+                              target_event=target_event, 
+                              sigma_eps = rep(0.5, K), 
+                              omega=0.2, weib_shape=1.1, 
+                              beta_X = c(log(1.05), log(1.05), log(1.05), log(1.05), log(1.05)), 
+                              out_dir="results", file.out=file.out)
+  
+}
+
+
+
+
+file.out <- "summary.semi.weib.bias.5.out"
+if ( file.exists(as.character(file.out)) ) { unlink(as.character(file.out)) }
+
+for (target_event in c(0.3, 0.1)) {
+  summary.semi.gva.bias.f(N=1000, K=K, target_pi=c(0.3, 0.3, 0.3, 0.1, 0.1),  
+                              target_event=target_event, 
+                              sigma_eps = rep(0.5, K), 
+                              omega=0.2, weib_shape=1.1, 
+                              beta_X = c(0, 0, 0, log(1.5), log(1.5)), 
+                              out_dir="results", file.out=file.out)
+  summary.semi.gva.bias.f(N=1000, K=K, target_pi=c(0.1, 0.1, 0.1, 0.3, 0.3),  
+                              target_event=target_event, 
+                              sigma_eps = rep(0.5, K), 
+                              omega=0.2, weib_shape=1.1, 
+                              beta_X = c(0, 0, 0, log(1.5), log(1.5)), 
+                              out_dir="results", file.out=file.out)
+  summary.semi.gva.bias.f(N=1000, K=K, target_pi=c(0.2, 0.2, 0.2, 0.2, 0.2),  
+                              target_event=target_event, 
+                              sigma_eps = rep(0.5, K), 
+                              omega=0.2, weib_shape=1.1, 
+                              beta_X = c(0, 0, 0, log(1.5), log(1.5)),
+                              out_dir="results", file.out=file.out)
+  
+  summary.semi.gva.bias.f(N=1000, K=K, target_pi=c(0.2, 0.2, 0.2, 0.2, 0.2),  
+                              target_event=target_event, 
+                              sigma_eps = rep(0.5, K), 
+                              omega=0.2, weib_shape=1.1, 
+                              beta_X = c(log(1.05), log(1.05), log(1.05), log(1.05), log(1.05)),
+                              out_dir="results", file.out=file.out)
+  summary.semi.gva.bias.f(N=1000, K=K, target_pi=c(0.1, 0.1, 0.1, 0.3, 0.3),  
+                              target_event=target_event, 
+                              sigma_eps = rep(0.5, K), 
+                              omega=0.2, weib_shape=1.1, 
+                              beta_X = c(log(1.05), log(1.05), log(1.05), log(1.05), log(1.05)), 
+                              out_dir="results", file.out=file.out)
+  
+}
